@@ -1,56 +1,66 @@
 package com.project.back_end.controllers;
 
 import com.project.back_end.models.Doctor;
+import com.project.back_end.models.Appointment;
+import com.project.back_end.services.DoctorService;
+import com.project.back_end.services.TokenService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/doctors")
+@RequestMapping("/api/doctors")
 public class DoctorController {
 
-    // Demo in-memory list for now (replace with database later)
-    private List<Doctor> doctorList = new ArrayList<>();
+    @Autowired
+    private DoctorService doctorService;
 
-    // Get all doctors
+    @Autowired
+    private TokenService tokenService;
+
+    // --- Basic CRUD (example) ---
     @GetMapping
     public List<Doctor> getAllDoctors() {
-        return doctorList;
+        return doctorService.getAllDoctors();
     }
 
-    // Get a doctor by ID
     @GetMapping("/{id}")
-    public Doctor getDoctorById(@PathVariable int id) {
-        return doctorList.stream()
-                .filter(d -> d.getId() == id)
-                .findFirst()
-                .orElse(null);
+    public Doctor getDoctorById(@PathVariable Long id) {
+        return doctorService.getDoctorById(id);
     }
 
-    // Add a new doctor
     @PostMapping
-    public Doctor addDoctor(@RequestBody Doctor doctor) {
-        doctorList.add(doctor);
-        return doctor;
+    public Doctor createDoctor(@RequestBody Doctor doctor) {
+        return doctorService.createDoctor(doctor);
     }
 
-    // Update a doctor
     @PutMapping("/{id}")
-    public Doctor updateDoctor(@PathVariable int id, @RequestBody Doctor updatedDoctor) {
-        for (int i = 0; i < doctorList.size(); i++) {
-            if (doctorList.get(i).getId() == id) {
-                doctorList.set(i, updatedDoctor);
-                return updatedDoctor;
-            }
-        }
-        return null;
+    public Doctor updateDoctor(@PathVariable Long id, @RequestBody Doctor doctor) {
+        return doctorService.updateDoctor(id, doctor);
     }
 
-    // Delete a doctor
     @DeleteMapping("/{id}")
-    public String deleteDoctor(@PathVariable int id) {
-        boolean removed = doctorList.removeIf(d -> d.getId() == id);
-        return removed ? "Doctor deleted successfully" : "Doctor not found";
+    public void deleteDoctor(@PathVariable Long id) {
+        doctorService.deleteDoctor(id);
+    }
+
+    // --- New endpoint: Get doctor availability ---
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<?> getDoctorAvailability(
+            @RequestHeader("Authorization") String token,
+            @PathVariable Long id,
+            @RequestParam String role,
+            @RequestParam String date // YYYY-MM-DD
+    ) {
+        if (!tokenService.validateToken(token, role)) {
+            return ResponseEntity.status(403).body("Invalid token or insufficient permissions");
+        }
+
+        LocalDate appointmentDate = LocalDate.parse(date);
+        List<Appointment> availableAppointments = doctorService.getAppointmentsByDoctorAndDate(id, appointmentDate);
+        return ResponseEntity.ok(availableAppointments);
     }
 }
