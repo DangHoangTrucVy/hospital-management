@@ -1,46 +1,66 @@
-package com.project.backend.models;
+package com.project.back_end.controllers;
 
-import jakarta.persistence.*;
-import java.time.LocalDate;
+import com.project.back_end.models.Prescription;
+import com.project.back_end.services.PrescriptionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-@Entity
-public class Prescription {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+import java.util.List;
 
-    private String medication;
-    private String dosage;
-    private LocalDate prescribedDate;
+@RestController
+@RequestMapping("/api/prescriptions")
+public class PrescriptionController {
 
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
-    private Patient patient;
+    @Autowired
+    private PrescriptionService prescriptionService;
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private Doctor doctor;
-
-    // Constructors
-    public Prescription() {}
-    public Prescription(String medication, String dosage, LocalDate prescribedDate, Patient patient, Doctor doctor) {
-        this.medication = medication;
-        this.dosage = dosage;
-        this.prescribedDate = prescribedDate;
-        this.patient = patient;
-        this.doctor = doctor;
+    // Lấy tất cả prescriptions
+    @GetMapping
+    public ResponseEntity<List<Prescription>> getAllPrescriptions() {
+        List<Prescription> prescriptions = prescriptionService.getAllPrescriptions();
+        return ResponseEntity.ok(prescriptions);
     }
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public String getMedication() { return medication; }
-    public void setMedication(String medication) { this.medication = medication; }
-    public String getDosage() { return dosage; }
-    public void setDosage(String dosage) { this.dosage = dosage; }
-    public LocalDate getPrescribedDate() { return prescribedDate; }
-    public void setPrescribedDate(LocalDate prescribedDate) { this.prescribedDate = prescribedDate; }
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
-    public Doctor getDoctor() { return doctor; }
-    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
+    // Lấy prescription theo id
+    @GetMapping("/{id}")
+    public ResponseEntity<Prescription> getPrescriptionById(@PathVariable Long id) {
+        Prescription prescription = prescriptionService.getPrescriptionById(id);
+        if (prescription != null) {
+            return ResponseEntity.ok(prescription);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Tạo mới prescription
+    @PostMapping
+    public ResponseEntity<Prescription> createPrescription(@RequestBody Prescription prescription) {
+        Prescription savedPrescription = prescriptionService.savePrescription(prescription);
+        return ResponseEntity.ok(savedPrescription);
+    }
+
+    // Cập nhật prescription
+    @PutMapping("/{id}")
+    public ResponseEntity<Prescription> updatePrescription(
+            @PathVariable Long id,
+            @RequestBody Prescription prescriptionDetails) {
+        Prescription updatedPrescription = prescriptionService.updatePrescription(id, prescriptionDetails);
+        if (updatedPrescription != null) {
+            return ResponseEntity.ok(updatedPrescription);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Xóa prescription
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePrescription(@PathVariable Long id) {
+        boolean deleted = prescriptionService.deletePrescription(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
