@@ -1,76 +1,38 @@
-package com.project.back_end.models;
+package com.project.backend.models;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
 public class Appointment {
-    private int id;
-    private int doctorId;
-    private int patientId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
     private LocalDateTime appointmentTime;
-    private String status; // ví dụ: "Scheduled", "Completed", "Cancelled"
 
-    // Constructor
-    public Appointment(int id, int doctorId, int patientId, LocalDateTime appointmentTime, String status) {
-        this.id = id;
-        this.doctorId = doctorId;
-        this.patientId = patientId;
-        this.appointmentTime = appointmentTime;
-        this.status = status;
-    }
-
-    // Default constructor
+    // Constructors
     public Appointment() {}
+    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime) {
+        this.doctor = doctor;
+        this.patient = patient;
+        this.appointmentTime = appointmentTime;
+    }
 
     // Getters and Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(int doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public int getPatientId() {
-        return patientId;
-    }
-
-    public void setPatientId(int patientId) {
-        this.patientId = patientId;
-    }
-
-    public LocalDateTime getAppointmentTime() {
-        return appointmentTime;
-    }
-
-    public void setAppointmentTime(LocalDateTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    // Optional: toString() for debugging
-    @Override
-    public String toString() {
-        return "Appointment{" +
-                "id=" + id +
-                ", doctorId=" + doctorId +
-                ", patientId=" + patientId +
-                ", appointmentTime=" + appointmentTime +
-                ", status='" + status + '\'' +
-                '}';
-    }
+    public Long getId() { return id; }
+    public Doctor getDoctor() { return doctor; }
+    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+    public LocalDateTime getAppointmentTime() { return appointmentTime; }
+    public void setAppointmentTime(LocalDateTime appointmentTime) { this.appointmentTime = appointmentTime; }
 }
