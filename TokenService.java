@@ -1,31 +1,31 @@
-package com.project.backend.services;
+package com.project.back_end.services;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.security.Key;
+import java.util.Date;
 
 @Service
 public class TokenService {
 
-    private Map<String, String> tokenStore = new HashMap<>();
+    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // key cho signing JWT
+    private final long expirationMillis = 24 * 60 * 60 * 1000; // 1 ngày
 
-    public String generateToken(String username) {
-        String token = UUID.randomUUID().toString();
-        tokenStore.put(token, username);
-        return token;
+    // Tạo token dựa trên email
+    public String generateToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .signWith(key)
+                .compact();
     }
 
-    public boolean validateToken(String token) {
-        return tokenStore.containsKey(token);
-    }
-
-    public String getUsernameFromToken(String token) {
-        return tokenStore.get(token);
-    }
-
-    public void revokeToken(String token) {
-        tokenStore.remove(token);
+    // Lấy signing key (nếu cần cho validation ở chỗ khác)
+    public Key getSigningKey() {
+        return key;
     }
 }
