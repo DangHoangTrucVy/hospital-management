@@ -1,62 +1,46 @@
-package com.project.back_end.controllers;
+package com.project.backend.models;
 
-import com.project.back_end.models.Prescription;
-import com.project.back_end.services.PrescriptionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
-import java.util.List;
+@Entity
+public class Prescription {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@RestController
-@RequestMapping("/api/prescriptions")
-public class PrescriptionController {
+    private String medication;
+    private String dosage;
+    private LocalDate prescribedDate;
 
-    @Autowired
-    private PrescriptionService prescriptionService;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
-    // Get all prescriptions
-    @GetMapping
-    public List<Prescription> getAllPrescriptions() {
-        return prescriptionService.getAllPrescriptions();
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
+
+    // Constructors
+    public Prescription() {}
+    public Prescription(String medication, String dosage, LocalDate prescribedDate, Patient patient, Doctor doctor) {
+        this.medication = medication;
+        this.dosage = dosage;
+        this.prescribedDate = prescribedDate;
+        this.patient = patient;
+        this.doctor = doctor;
     }
 
-    // Get prescription by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<Prescription> getPrescriptionById(@PathVariable int id) {
-        Prescription prescription = prescriptionService.getPrescriptionById(id);
-        if (prescription != null) {
-            return ResponseEntity.ok(prescription);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Add a new prescription
-    @PostMapping
-    public Prescription addPrescription(@RequestBody Prescription prescription) {
-        return prescriptionService.addPrescription(prescription);
-    }
-
-    // Update a prescription
-    @PutMapping("/{id}")
-    public ResponseEntity<Prescription> updatePrescription(@PathVariable int id, @RequestBody Prescription updatedPrescription) {
-        Prescription prescription = prescriptionService.updatePrescription(id, updatedPrescription);
-        if (prescription != null) {
-            return ResponseEntity.ok(prescription);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    // Delete a prescription
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePrescription(@PathVariable int id) {
-        boolean deleted = prescriptionService.deletePrescription(id);
-        if (deleted) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
-    }
+    // Getters and Setters
+    public Long getId() { return id; }
+    public String getMedication() { return medication; }
+    public void setMedication(String medication) { this.medication = medication; }
+    public String getDosage() { return dosage; }
+    public void setDosage(String dosage) { this.dosage = dosage; }
+    public LocalDate getPrescribedDate() { return prescribedDate; }
+    public void setPrescribedDate(LocalDate prescribedDate) { this.prescribedDate = prescribedDate; }
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+    public Doctor getDoctor() { return doctor; }
+    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
 }
