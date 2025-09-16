@@ -1,38 +1,36 @@
-package com.project.backend.models;
+package com.project.back_end.models;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
+@Table(name = "appointment")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Appointment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private Doctor doctor;
-
-    @ManyToOne
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    private LocalDateTime appointmentTime;
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
 
-    // Constructors
-    public Appointment() {}
-    public Appointment(Doctor doctor, Patient patient, LocalDateTime appointmentTime) {
-        this.doctor = doctor;
-        this.patient = patient;
-        this.appointmentTime = appointmentTime;
-    }
+    @NotNull
+    @Future
+    private LocalDate appointmentDate;
 
-    // Getters and Setters
-    public Long getId() { return id; }
-    public Doctor getDoctor() { return doctor; }
-    public void setDoctor(Doctor doctor) { this.doctor = doctor; }
-    public Patient getPatient() { return patient; }
-    public void setPatient(Patient patient) { this.patient = patient; }
-    public LocalDateTime getAppointmentTime() { return appointmentTime; }
-    public void setAppointmentTime(LocalDateTime appointmentTime) { this.appointmentTime = appointmentTime; }
+    @NotNull
+    @Future
+    private LocalTime appointmentTime;
 }
